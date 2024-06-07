@@ -147,7 +147,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: trail
-      ImageId: ami-076fe60835f136dc9
+      ImageId: ami-0e001c9271cf7f3b9
       SubnetId: !Ref PublicSubnet1
       SecurityGroupIds:
         - !Ref PublicInstanceSecurityGroup
@@ -161,7 +161,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: trail
-      ImageId: ami-076fe60835f136dc9
+      ImageId: ami-0e001c9271cf7f3b9
       SubnetId: !Ref PublicSubnet2
       SecurityGroupIds:
         - !Ref PublicInstanceSecurityGroup
@@ -176,7 +176,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: trail
-      ImageId: ami-076fe60835f136dc9
+      ImageId: ami-0e001c9271cf7f3b9
       SubnetId: !Ref PrivateSubnet1
       SecurityGroupIds:
         - !Ref PrivateInstanceSecurityGroup
@@ -189,7 +189,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: trail
-      ImageId: ami-076fe60835f136dc9
+      ImageId: ami-0e001c9271cf7f3b9
       SubnetId: !Ref PrivateSubnet2
       SecurityGroupIds:
         - !Ref PrivateInstanceSecurityGroup
