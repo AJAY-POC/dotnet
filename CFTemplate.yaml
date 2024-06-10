@@ -176,7 +176,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: useastpem2
-      ImageId: ami-0914e1bb5b0b397d3
+      ImageId: ami-0a2e5080e7411bc29
       SubnetId: !Ref PublicSubnet1
       SecurityGroupIds:
         - !Ref PublicInstanceSecurityGroup
@@ -189,7 +189,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: useastpem2
-      ImageId: ami-0914e1bb5b0b397d3
+      ImageId: ami-0a2e5080e7411bc29
       SubnetId: !Ref PublicSubnet2
       SecurityGroupIds:
         - !Ref PublicInstanceSecurityGroup
@@ -202,7 +202,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: useastpem2
-      ImageId: ami-0914e1bb5b0b397d3
+      ImageId: ami-0a2e5080e7411bc29
       SubnetId: !Ref PrivateSubnet1
       SecurityGroupIds:
         - !Ref PrivateInstanceSecurityGroup
@@ -215,7 +215,7 @@ Resources:
     Properties:
       InstanceType: t2.micro
       KeyName: useastpem2
-      ImageId: ami-0914e1bb5b0b397d3
+      ImageId: ami-0a2e5080e7411bc29
       SubnetId: !Ref PrivateSubnet2
       SecurityGroupIds:
         - !Ref PrivateInstanceSecurityGroup
