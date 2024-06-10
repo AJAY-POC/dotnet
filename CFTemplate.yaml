@@ -175,7 +175,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: useastpem
+      KeyName: useastpem2
       ImageId: ami-0914e1bb5b0b397d3
       SubnetId: !Ref PublicSubnet1
       SecurityGroupIds:
@@ -188,7 +188,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: useastpem
+      KeyName: useastpem2
       ImageId: ami-0914e1bb5b0b397d3
       SubnetId: !Ref PublicSubnet2
       SecurityGroupIds:
@@ -201,7 +201,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: useastpem
+      KeyName: useastpem2
       ImageId: ami-0914e1bb5b0b397d3
       SubnetId: !Ref PrivateSubnet1
       SecurityGroupIds:
@@ -214,7 +214,7 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: useastpem
+      KeyName: useastpem2
       ImageId: ami-0914e1bb5b0b397d3
       SubnetId: !Ref PrivateSubnet2
       SecurityGroupIds:
