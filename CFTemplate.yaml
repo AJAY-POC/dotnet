@@ -1,7 +1,15 @@
-
 AWSTemplateFormatVersion: '2010-09-09'
 Description: AWS CloudFormation Template to create a VPC with public and private subnets, EC2 instances, and Load Balancers. The instances in the private subnet can be accessed via instances in the public subnet.
- 
+
+Parameters:
+  Environment:
+    Type: String
+    Description: The environment (dev or qa)
+    AllowedValues:
+      - dev
+      - qa
+    Default: dev
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -11,21 +19,21 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: MyVPC
- 
+          Value: !Sub "${Environment}-VPC"
+
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: MyInternetGateway
- 
+          Value: !Sub "${Environment}-InternetGateway"
+
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref VPC
       InternetGatewayId: !Ref InternetGateway
- 
+
   PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -35,8 +43,8 @@ Resources:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       Tags:
         - Key: Name
-          Value: PublicSubnet1
- 
+          Value: !Sub "${Environment}-PublicSubnet1"
+
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -46,8 +54,8 @@ Resources:
       AvailabilityZone: !Select [ 1, !GetAZs '' ]
       Tags:
         - Key: Name
-          Value: PublicSubnet2
- 
+          Value: !Sub "${Environment}-PublicSubnet2"
+
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -56,8 +64,8 @@ Resources:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       Tags:
         - Key: Name
-          Value: PrivateSubnet1
- 
+          Value: !Sub "${Environment}-PrivateSubnet1"
+
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
@@ -66,16 +74,16 @@ Resources:
       AvailabilityZone: !Select [ 1, !GetAZs '' ]
       Tags:
         - Key: Name
-          Value: PrivateSubnet2
- 
+          Value: !Sub "${Environment}-PrivateSubnet2"
+
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: PublicRouteTable
- 
+          Value: !Sub "${Environment}-PublicRouteTable"
+
   PublicRoute:
     Type: AWS::EC2::Route
     DependsOn: AttachGateway
@@ -83,39 +91,60 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
- 
+
   PublicSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet1
       RouteTableId: !Ref PublicRouteTable
- 
+
   PublicSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
- 
+
   PrivateRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: PrivateRouteTable
- 
+          Value: !Sub "${Environment}-PrivateRouteTable"
+
   PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet1
       RouteTableId: !Ref PrivateRouteTable
- 
+
   PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet2
       RouteTableId: !Ref PrivateRouteTable
- 
+
+  NATGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-NATGateway"
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway
+
   PublicInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -126,7 +155,7 @@ Resources:
           FromPort: -1
           ToPort: -1
           CidrIp: 0.0.0.0/0
- 
+
   PrivateInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -141,73 +170,70 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
- 
+
   PublicInstance1:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: trail
-      ImageId: ami-0e001c9271cf7f3b9
+      KeyName: useastpem
+      ImageId: ami-076fe60835f136dc9
       SubnetId: !Ref PublicSubnet1
       SecurityGroupIds:
         - !Ref PublicInstanceSecurityGroup
       Tags:
         - Key: Name
-          Value: PublicInstance1
-      
- 
+          Value: !Sub "${Environment}-PublicInstance1"
+
   PublicInstance2:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: trail
-      ImageId: ami-0e001c9271cf7f3b9
+      KeyName: useastpem
+      ImageId: ami-076fe60835f136dc9
       SubnetId: !Ref PublicSubnet2
       SecurityGroupIds:
         - !Ref PublicInstanceSecurityGroup
       Tags:
         - Key: Name
-          Value: PublicInstance2
-     
-        
- 
+          Value: !Sub "${Environment}-PublicInstance2"
+
   PrivateInstance1:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: trail
-      ImageId: ami-0e001c9271cf7f3b9
+      KeyName: useastpem
+      ImageId: ami-076fe60835f136dc9
       SubnetId: !Ref PrivateSubnet1
       SecurityGroupIds:
         - !Ref PrivateInstanceSecurityGroup
       Tags:
         - Key: Name
-          Value: PrivateInstance1
- 
+          Value: !Sub "${Environment}-PrivateInstance1"
+
   PrivateInstance2:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      KeyName: trail
-      ImageId: ami-0e001c9271cf7f3b9
+      KeyName: useastpem
+      ImageId: ami-076fe60835f136dc9
       SubnetId: !Ref PrivateSubnet2
       SecurityGroupIds:
         - !Ref PrivateInstanceSecurityGroup
       Tags:
         - Key: Name
-          Value: PrivateInstance2
- 
+          Value: !Sub "${Environment}-PrivateInstance2"
+
   PublicLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: PublicLoadBalancer
+      Name: !Sub "${Environment}-PublicLoadBalancer"
       Subnets:
         - !Ref PublicSubnet1
         - !Ref PublicSubnet2
       SecurityGroups:
         - !Ref PublicInstanceSecurityGroup
       Scheme: internet-facing
- 
+
   PublicTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -220,7 +246,7 @@ Resources:
       Matcher:
         HttpCode: '200'
       TargetType: instance
- 
+
   PublicListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -230,18 +256,18 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref PublicTargetGroup
- 
+
   PrivateLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: PrivateLoadBalancer
+      Name: !Sub "${Environment}-PrivateLoadBalancer"
       Subnets:
         - !Ref PrivateSubnet1
         - !Ref PrivateSubnet2
       SecurityGroups:
         - !Ref PrivateInstanceSecurityGroup
       Scheme: internal
- 
+
   PrivateTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -254,7 +280,7 @@ Resources:
       Matcher:
         HttpCode: '200'
       TargetType: instance
- 
+
   PrivateListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -264,25 +290,3 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref PrivateTargetGroup
- 
-Outputs:
-  VPCId:
-    Description: VPC Id
-    Value: !Ref VPC
- 
-  PublicSubnet1Id:
-    Description: Public Subnet 1 Id
-    Value: !Ref PublicSubnet1
- 
-  PublicSubnet2Id:
-    Description: Public Subnet 2 Id
-    Value: !Ref PublicSubnet2
- 
-  PrivateSubnet1Id:
-    Description: Private Subnet 1 Id
-    Value: !Ref PrivateSubnet1
- 
-  PrivateSubnet2Id:
-    Description: Private Subnet 2 Id
-    Value: !Ref PrivateSubnet2
- 
